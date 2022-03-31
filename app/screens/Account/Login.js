@@ -7,7 +7,7 @@ export default function Login(){
     return(
     <ScrollView>
         <Image
-            source={require('../../../assets/img/goiko_logo.png')}
+            source={require('../../../assets/img/goiko-logo.png')}
             resizeMode='contain'
             style={styles.logo}
         
