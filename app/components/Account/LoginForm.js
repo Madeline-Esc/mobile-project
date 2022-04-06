@@ -2,18 +2,18 @@ import React, {useState} from 'react'
 import { StyleSheet, View, Text } from 'react-native'
 import { Input, Icon, Button} from 'react-native-elements'
 import { validateEmail} from '../../utils/validation'
-import firebase from 'firebase'
 import {useNavigation} from '@react-navigation/native'
+import firebase from 'firebase'
 
-export default function RegisterForm(props){
+
+export default function LoginForm(props){
     const {toastRef} = props
     const [showPassword, setShowPassword] = useState(false)
-    const [showRepeatPassword, setShowRepeatPassword] = useState(false)
     const [formData, setFormData] = useState(defaultFormValues())
     const navigation = useNavigation()
-    
+
     const onSubmit = () => {
-        if(formData.email.length===0||formData.password.length===0||formData.repeatPassword.length===0){
+        if(formData.email.length===0||formData.password.length===0){
             toastRef.current.show({
                 type: 'error',
                 position: 'top',
@@ -30,55 +30,34 @@ export default function RegisterForm(props){
                 text2: 'El email no es correcto',
                 visibilityTime: 3000,
             });
-
-        } else if (formData.password !== formData.repeatPassword){
+       } else{
+        firebase
+        .auth()
+        .signInWithEmailAndPassword(formData.email, formData.password)
+        .then(()=>{
+            navigation.navigate('account')
+        })
+        .catch(()=>{
             toastRef.current.show({
                 type: 'error',
                 position: 'top',
-                text1: 'Password',
-                text2: 'Las contraseñas deben ser idènticas',
+                text1: 'Cuenta',
+                text2: 'Correo o contraseña incorrectos',
                 visibilityTime: 3000,
-            });
-
-        } else if (formData.password.length < 6) {
-            toastRef.current.show({
-                type: 'error',
-                position: 'top',
-                text1: 'Password',
-                text2: 'La longitud mìnima de la contraseña es de 6 caracteres',
-                visibilityTime: 3000,
-            });
-
-        } else{
-            firebase.
-            auth()
-            .createUserWithEmailAndPassword(formData.email, formData.password)
-            .then((response)=>{
-                navigation.navigate('account')
             })
-            .catch(()=>{
-                toastRef.current.show({
-                    type: 'error',
-                    position: 'top',
-                    text1: 'Cuenta',
-                    text2: 'Este correo ya ha sido registrado',
-                    visibilityTime: 3000,
-                });
-            })
-        }
-        
-    }
-
-    const onChange = (e, type) => {
-        //console.log(type)
-        //console.log(e.nativeEvent.text)
-        //setFormData({[type]: e.nativeEvent.text})
-        setFormData({ ...formData, [type]: e.nativeEvent.text})
+        })
     }
     
-    return(
-        <View style={styles.formContainer}>
-             <Input
+    }
+    
+    const onChange = (e, type) => {
+        setFormData({ ...formData, [type]: e.nativeEvent.text})
+    }
+
+
+   return(
+       <View style={styles.container}>
+            <Input
                  placeholder='Correo electrónico'
                  containerStyle={styles.inputForm}
                  onChange={(e)=>onChange(e, 'email')}
@@ -95,41 +74,26 @@ export default function RegisterForm(props){
                     name={showPassword ? 'eye-off-outline':'eye-outline' }
                     iconStyle={styles.iconRight}
                     onPress={()=> setShowPassword(!showPassword)}
-            />}
-             />
-             <Input
-                 placeholder='Repetir contraseña'
-                 containerStyle={styles.inputForm}
-                 password={true}
-                 secureTextEntry={showRepeatPassword ? false : true}
-                 onChange={(e)=>onChange(e, 'repeatPassword')}
-                 rightIcon={<Icon 
-                    type='material-community'
-                    name={showRepeatPassword ? 'eye-off-outline':'eye-outline' }
-                    iconStyle={styles.iconRight}
-                    onPress={()=> setShowRepeatPassword(!showRepeatPassword)}
-             />}
-             />
-             <Button
-                 title='Únete'
-                 containerStyle={styles.btnContainerRegister}
-                 buttonStyle={styles.btnRegister}
+            />
+        }
+        />
+         <Button
+                 title='Iniciar sesión'
+                 containerStyle={styles.btnContainerLogin}
+                 buttonStyle={styles.btnLogin}
                  onPress={onSubmit}
              />
-        </View>
-
-    )
-
-}
+       </View>
+   )
+}    
 
 function defaultFormValues(){
     return{
         email: '',
-        password: '',
-        repeatPassword: ''
+        password: ''
     }
 }
-  
+
 const styles = StyleSheet.create({
     formContainer:{
         marginTop: 30,
@@ -138,15 +102,15 @@ const styles = StyleSheet.create({
         width: '100%',
         marginTop:20
     },
-    btnContainerRegister:{
+    btnContainerLogin:{
         marginTop: 20,
         width:'95%'
     },
-    btnRegister:{
+    btnLogin:{
         backgroundColor:'#00a680'
     },
     iconRight:{
         color: '#c1c1c1'
     }
-
 })
+  
