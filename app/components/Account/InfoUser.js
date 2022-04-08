@@ -7,7 +7,7 @@ import * as ImagePicker from 'expo-image-picker'
 
 export default function InfoUser(props){
     const {userInfo} = props
-    const {photoURL, displayName, email, toastRef} = userInfo
+    const {uid, photoURL, displayName, email, toastRef} = userInfo
 
     const changeAvatar= async()=>{
         const resultPermissions = await Permissions.askAsync(Permissions.CAMERA_ROLL)
@@ -27,12 +27,53 @@ export default function InfoUser(props){
                 allowsEditing:true,
                 aspect:[4,3]
             })
+            console.log(result)
+            if (result.cancelled){
+                toastRef.current.show({
+                    type:'info',
+                    position: 'top',
+                    text1: 'Cancelled',
+                    text2: 'No elegiste avatar de la geleria',
+                    visibility: 3000,
+                })
+            } else{
+                uploadImage(result.uri).then(()=>{
+                    console.log('Imagen dentro de firebase')
+                    updatePhotoUrl()
+                }).catch(()=>{
+                    toastRef.current.show({
+                        type:'error',
+                        position: 'top',
+                        text1: 'Firebase',
+                        text2: 'Error al actualizar el avatar',
+                        visibility: 3000,
+                    })
+                })
+                
+            }
         }
     }
 
-    console.log(photoURL)
-    console.log(displayName)
-    console.log(email)
+    const uploadImage = async (uri) => {
+        console.log(uri)
+        const response = await fetch(uri)
+                console.log(JSON.stringify(response))
+                const blob = await response.blob()
+                console.log(JSON.stringify(blob))
+                const ref = firebase.storage().ref().child(`avatar/${uid}`)
+                return ref.put(blob)
+        
+    }
+
+    const updatePhotoUrl = () =>{
+        firebase.storage().ref(`avatar/${uid}`).getDownloadURL()
+        .then(async(response)=>{
+            console.log(response)
+            const update = {photoURL : response}
+            await firebase.auth().currentUser.updateProfile(update)
+            console.log('Imagen actualizada')
+        })
+    }
 
     return(
         <View style= {styles.viewUserInfo}>
