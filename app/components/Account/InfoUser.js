@@ -6,23 +6,23 @@ import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
 
 export default function InfoUser(props){
-    const {userInfo} = props
-    const {uid, photoURL, displayName, email, toastRef} = userInfo
+    const {userInfo: {uid, photoURL, displayName, email}, toastRef} = props
+    
 
     const changeAvatar= async()=>{
         const resultPermissions = await Permissions.askAsync(Permissions.CAMERA_ROLL)
-        console.log(resultPermissions.permissions.mediaLibrary)
         const resultPermissionsCamera = resultPermissions.permissions.mediaLibrary.status
 
-        if(resultPermissionsCamera === 'denied '){
+        if(resultPermissionsCamera === 'denied'){
             toastRef.current.show({
-                type:'error',
+                type:'info',
                 position: 'top',
                 text1: 'Permissions',
-                text2: 'Es necesario aceptar los permisos de la galeria',
-                visibility: 3000,
-            }); 
-        } else {
+                text2: 'Es necesario aceptar los permisos de la galería',
+                visibilityTime: 3000,
+            })
+
+        } else{
             const result = await ImagePicker.launchImageLibraryAsync({
                 allowsEditing:true,
                 aspect:[4,3]
@@ -33,8 +33,8 @@ export default function InfoUser(props){
                     type:'info',
                     position: 'top',
                     text1: 'Cancelled',
-                    text2: 'No elegiste avatar de la geleria',
-                    visibility: 3000,
+                    text2: 'No elegiste avatar de la galeria',
+                    visibilityTime: 3000,
                 })
             } else{
                 uploadImage(result.uri).then(()=>{
@@ -46,7 +46,7 @@ export default function InfoUser(props){
                         position: 'top',
                         text1: 'Firebase',
                         text2: 'Error al actualizar el avatar',
-                        visibility: 3000,
+                        visibilityTime: 3000,
                     })
                 })
                 
