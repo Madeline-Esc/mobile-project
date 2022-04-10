@@ -4,6 +4,7 @@ import {Button} from 'react-native-elements'
 import firebase from 'firebase'
 import Toast from 'react-native-toast-message'
 import InfoUser from '../../components/Account/InfoUser'
+import AccountOptions from '../../components/Account/AccountOptions'
 
 export default function UserLogged(){
     const [userInfo, setUserInfo] = useState(null)
@@ -16,11 +17,11 @@ export default function UserLogged(){
 
     }, [])
     return(
-        <View style={styles.viewUserInfo}>
+        <View style={styles.ViewUserInfo}>
             {userInfo&&<InfoUser userInfo={userInfo} toastRef={toastRef}/>}
-            <Text>AccountOptions...</Text>
+            <AccountOptions userInfo= {userInfo} toastRef={toastRef}/>
             <Button 
-            title='Cerrar sesiòn' 
+            title='Cerrar sesión' 
             buttonStyle={styles.btnCloseSession}
             titleStyle={styles.btnCloseSessionText}
             onPress={()=>firebase.auth().signOut()}/>
