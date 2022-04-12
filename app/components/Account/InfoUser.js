@@ -1,13 +1,15 @@
-import React from "react"
+import React, {useState} from "react"
 import { StyleSheet, View, Text } from "react-native"
 import { Avatar } from "react-native-elements"
 import firebase from 'firebase'
 import * as Permissions from 'expo-permissions'
 import * as ImagePicker from 'expo-image-picker'
+import Loading from '../Loading'
+
 
 export default function InfoUser(props){
     const {userInfo: {uid, photoURL, displayName, email}, toastRef} = props
-    
+    const [isLoading, setIsLoading] = useState(false) 
 
     const changeAvatar= async()=>{
         const resultPermissions = await Permissions.askAsync(Permissions.CAMERA_ROLL)
@@ -68,12 +70,16 @@ export default function InfoUser(props){
     const updatePhotoUrl = () =>{
         firebase.storage().ref(`avatar/${uid}`).getDownloadURL()
         .then(async(response)=>{
+            setIsLoading(true)
             console.log(response)
             const update = {photoURL : response}
             await firebase.auth().currentUser.updateProfile(update)
             console.log('Imagen actualizada')
+            setIsLoading(false)
         })
     }
+
+   
 
     return(
         <View style= {styles.viewUserInfo}>
@@ -84,18 +90,23 @@ export default function InfoUser(props){
                 onPress={changeAvatar}
                 containerStyle={styles.userInfoAvatar}
                 source={
-                    photoURL ? {uri:photoURL} : require('../../../assets/img/avatar-default.jpg')
+                    photoURL ? {uri:photoURL} : require('../../../assets/img/avatar-default.jpg')  
                 }
+                loading={isLoading}
             />
             <View>
                 <Text style={styles.displayName}>
                 {displayName ? displayName : 'Invitado'}
                 </Text>
                 <Text>{email ? email : 'Entrada por SSO'}</Text>
+                <Loading isVisible={isLoading} text= "Cargando"/>
             </View>
+
         </View>
     )
 }
+
+
 
 const styles = StyleSheet.create({
     viewUserInfo:{
